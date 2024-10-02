@@ -1,4 +1,4 @@
-#inlcude <bits/stdc++.h>
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -18,7 +18,7 @@ int main(){
 
         if(k >= 2) cout<<"YES";
         else{
-            if(is_sorted(arr.begin(), aee.end())) cout<<"YES";
+            if(is_sorted(arr.begin(), arr.end())) cout<<"YES";
             else cout<<"NO";
         }
     }
