@@ -7,11 +7,14 @@ using namespace std;
 
 
 int main(){
+    //cout<<"enter t: ";
     int t;
     cin>>t;
-
+    
+    vector<string> ans;
     while(t--){
         int n, k;
+        //cout<<"enter n and k: ";
         cin >> n >> k;
 
         vector<int> arr(n);
@@ -19,11 +22,15 @@ int main(){
             cin >> arr[i];
         }
 
-        if(k >= 2) cout<<"YES";
+        if(k >= 2) ans.push_back("YES");
         else{
-            if(is_sorted(arr.begin(), arr.end())) cout<<"YES";
-            else cout<<"NO";
+            if(is_sorted(arr.begin(), arr.end())) ans.push_back("YES");
+            else ans.push_back("NO");
         }
+    }
+    
+    for(string s : ans){
+        cout<<s<<endl;
     }
     return 0;
 }
