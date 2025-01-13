@@ -1,0 +1,32 @@
+chatgpt history of steps of solving the issue - 
+https://chatgpt.com/share/6784ec7f-50e4-8009-a312-e5ad22cf6268
+
+
+1) open vs code
+2) press ctrl+shift+p
+3) Type and select C/C++: Edit Configurations (UI).
+4) Then go the json file
+5) {
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:/MinGW/include",
+                "C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++",  // Correct path to C++ headers
+                "C:/MinGW/lib/gcc/mingw32/6.3.0/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "C:/MinGW/bin/g++.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64"  // Correct IntelliSense mode for MinGW GCC
+        }
+    ],
+    "version": 4
+}
