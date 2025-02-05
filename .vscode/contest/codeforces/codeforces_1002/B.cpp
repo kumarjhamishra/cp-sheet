@@ -11,39 +11,30 @@ void solve(){
         cin >> a[i];
     }
     
-    int s = 0, e = n - 1 - (k-1);
-    vector<int> sub;
-    for(int subArr = 1; subArr <= k; subArr++){
-        if(subArr % 2 != 0) s++;
-        else{
-            e = n - 1 - (k-subArr);
-            int pos = sub.size() + 1;
-            //bool found
-            unordered_map<ll, ll> mp;
-            for(int i = s; i < n && i <= e; i++){
-                mp[1ll*a[i]]++;
-            }
+    if(k == n){
+        for(int ik = 1; ik <= n; ik++){
+            if(ik % 2 == 1) continue;
 
-            if(mp.count(pos) && mp[pos] > 1){
-                //cout << "ans" << endl;
-                cout << pos+1 << endl;
-                return;
+            if(a[ik-1] != ik/2){
+                cout << ik/2 << endl;
+                return ;
             }
-            else if((mp.count(pos) && mp.size() > 1) || (mp.find(pos) == mp.end())){
-                //cout << "ans" << endl;
-                cout << pos << endl;
-                return;
-            }
-
-            sub.push_back(a[s]);
-            s++;
         }
+
+        cout << k/2 + 1 << endl;
+        return ;
     }
 
-    sub.push_back(0);
-    //cout << "ans" << endl;
-    cout << sub.size() << endl;
+    // windowSize >= 2
+    int windowEnd = n-1 - (k - 2);
+    int countOf1 = 0;
+    for(int i = 1; i <= windowEnd; i++){
+        if(a[i] == 1) countOf1++;
+    }
+
+    cout << (countOf1 == windowEnd ? 2 : 1) << endl;
     return ;
+
 }
 
 int main(){
