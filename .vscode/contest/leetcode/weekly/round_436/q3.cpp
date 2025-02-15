@@ -2,137 +2,125 @@
 using namespace std;
 typedef long long ll;
 
+// reference solution - https://leetcode.com/problems/count-substrings-divisible-by-last-digit/solutions/6395865/c-number-theory-digit-by-digit
 
 class Solution
 {
-private:
-    vector<ll> pre, prevPosition, prevCount;
-    ll count3(string s, ll end){
-        ll count = 0;
-        for(ll i = 0; i <= end; i++){
-            ll sum = pre[end];
-            sum -= (i > 0 ? pre[i-1] : 0);
-            count += (sum % 3 == 0 ? 1 : 0);
-        }
-
-        return count;
-    }
-
-    ll count4(string s){
-        int n = s.size();
-        if(n == 1) return 1;
-
-        int twoDigits = stoi(s.substr(n-2));
-        ll count = 0;
-        return twoDigits % 4 == 0 ? n : 1;
-    }
-
-    ll count6(string s, ll end){
-        // any numbers ending at 6 always be divisible by 2 so we only need to check for divisibility with 3
-        return count3(s, end);
-    }
-
-    ll count7(string s){
-        ll n = s.size();
-        string temp(n, 7);
-
-        // case of all 7
-        if(s == temp) return n;
-        
-        ll count = 0;
-        string num = s;
-        for(int i = 0; i < n; i++){
-            int nums = stoi(num);
-            if(nums % 7 == 0) count++;
-            num[i] = '0';
-        }
-
-        return count;
-
-    }
-
-    ll count8(string s){
-        int n = s.size();
-        if(n == 1) return 1;
-        if(n == 2){
-            return (s == "08" || s == "48" || s == "88") ? 2 : 1;
-        }
-        ll count = 0;
-        int threeDigit = stoi(s.substr(n-3));
-        if(threeDigit % 8 == 0){
-            count = n;
-            if(s != "08" && s!= "48" && s != "88") count -= 1;
-            return count;
-        }
-        
-        int twoDigits = stoi(s.substr(n-2));
-        if(twoDigits % 8 == 0) return 2;
-
-        return 1;
-    }
-
-    ll count9(string s, ll end){
-        ll count = 0;
-        for(ll i = 0; i <= end; i++){
-            ll sum = pre[end];
-            sum -= (i > 0 ? pre[i-1] : 0);
-            count += (sum % 9 == 0 ? 1 : 0);
-        }
-
-        return count;
-    }
 public:
-    long long countSubstrings(string& s)
-    {  
-       
-        ll n = s.size(), i = 0, j = 0, count = 0;
-        pre.resize(n, 0);
-        prevPosition.resize(n, -1);
-        prevCount.resize(n, 0);
-        
-        for(; j < n; j++){
-            pre[j] = s[j] - '0';
-            if(j > 0) pre[j] += pre[j-1];
+    long long countSubstrings(string s)
+    {
+        ll n = s.size();
+        vector<ll> mod9(9, 0), mod7(7, 0), temp(9, 0);
 
-            if(s[j] == '0'){
-                continue;
+        auto addMod9 = [&](int add)
+        {
+            for (int i = 0; i < 9; i++)
+            {
+                temp[(i + add) % 9] = mod9[i];
             }
-            else if(s[j] == '1' || s[j] == '2' || s[j] == '5'){
-                count += 1ll * (j + 1);
+
+            mod9 = temp;
+        };
+
+        auto addDigitMod7 = [&](int digit)
+        {
+            for (int i = 0; i < 7; i++)
+                temp[i] = 0;
+
+            for (int i = 0; i < 7; i++)
+            {
+                temp[(10 * i + digit) % 7] = mod7[i];
             }
-            else if(s[j] == '3'){
-                count += 1ll * count3(s.substr(i, j+1), j);
+
+            for (int i = 0; i < 7; i++)
+                mod7[i] = temp[i];
+        };
+
+        ll ans = 0;
+        for (ll i = 0; i < n; i++)
+        {
+            ll digit = s[i] - '0';
+
+            if (digit > 0)
+            {
+
+                // each digit will divide itself so 1 substring
+                ans++;
+
+                // for the substrings ending at 1, 2, 5 all the substrings will be counted bcoz all will be divisible
+                if (digit == 1 || digit == 2 || digit == 5)
+                {
+                    ans += i;
+                }
+
+                // for divisibility with 3 sum divisible by 3
+                // for divisibility with 6 divisibility with 2 (always true here) and divisibility with 3
+                else if (digit == 3 || digit == 6)
+                {
+                    // here we can also use the answers for 9 bcoz a number divisible by 9 will sure shot be divisbile by 3
+                    ans += mod9[0] + mod9[3] + mod9[6];
+
+                    // remainder -> 0 + num 3 -> total digit sum divisible by 3
+                    // remainder -> 3 + num 3 = 6 -> total digit sum divisible by 3
+                    // remainder -> 6 + num 3 = 9 -> total digit sum divisible by 3
+                }
+
+                // last 2 digits divisible by 4
+                else if (digit == 4)
+                {
+                    if (i > 0)
+                    {
+                        ll last2 = 10 * (s[i - 1] - '0') + 4;
+                        ans += last2 % 4 == 0 ? i : 0;
+                    }
+                }
+
+                // divisibility with 7
+                else if (digit == 7)
+                {
+                    // all the previous substrings which are divisible 7
+                    // explaination is in the solution link
+                    ans += mod7[0];
+                }
+
+                // last 3 digits divisible by 8
+                else if (digit == 8)
+                {
+                    if (i > 0)
+                    {
+                        ll last2 = 10 * (s[i - 1] - '0') + 8;
+                        ans += last2 % 8 == 0 ? 1 : 0;
+                        if (i >= 2)
+                        {
+                            ll last3 = 100 * (s[i - 2] - '0') + last2;
+                            ans += last3 % 8 == 0 ? i - 1 : 0;
+                        }
+                    }
+                }
+
+                else if (digit == 9)
+                    ans += mod9[0];
             }
-            else if(s[j] == '4'){
-                count += 1ll * count4(s.substr(i, j+1));
-            }
-            else if(s[j] == '6'){
-                count += 1ll * count6(s.substr(i, j+1), j);
-            }
-            else if(s[j] == '7'){
-                count += 1ll * count7(s.substr(i, j+1));
-            }
-            else if(s[j] == '8'){
-                count += 1ll * count8(s.substr(i, j+1));
-            }
-            else{
-                count += 1ll * count9(s.substr(i, j+1), j);
-            }
-            
+
+            addMod9(digit);
+            addDigitMod7(digit);
+            mod9[digit % 9]++;
+            mod7[digit % 7]++;
+
+            //cout << ans << endl;
         }
 
-        return count;
+        return ans;
     }
 };
 
-int
-main()
+int main()
 {
-    ios::sync_with_stdio(false);
+    ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    string s = "5701283";
     Solution sol;
+    string s = "057";
     cout << sol.countSubstrings(s) << endl;
 
     return 0;
