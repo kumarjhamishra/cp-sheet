@@ -1,19 +1,16 @@
 #include <bits/stdc++.h>
 using namespace std;
+//longest_divisors_interval.cpp
 typedef long long ll;
 
 void solve(){
-    ll a, b, n;
-    cin >> a >> b >> n;
+    ll n;
+    cin >> n;
 
-    vector<ll> x(n);
-    ll ans = b;
-    for(ll i = 0; i < n; i++){
-        cin >> x[i];
-        ans += min(a - 1, x[i]);
-    }
+    ll i = 1;
+    while(n % i == 0) {i++;}
 
-    cout << ans << endl;
+    cout << i - 1 << endl;
     return ;
 }
 
