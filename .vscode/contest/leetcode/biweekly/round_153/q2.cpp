@@ -39,7 +39,7 @@ public:
                     i++;
                 }
                 range_end = i-1;
-                start0[range_start] =continous0;
+                start0[range_start] = continous0;
                 end0[range_end] = continous0;
                 continous0 = 0;
             }
@@ -71,7 +71,7 @@ public:
                 //cout << "hello" << endl;
                 int newCount = count1;
                 newCount += (end0[st-1] + start0[e+1]);
-                cout << "new: " << newCount << endl;
+                //cout << "new: " << newCount << endl;
                 maxOnes = max(maxOnes, newCount);
             }
         }

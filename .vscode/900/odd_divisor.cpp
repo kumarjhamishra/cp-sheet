@@ -1,23 +1,21 @@
 #include <bits/stdc++.h>
 using namespace std;
 typedef long long ll;
-
-// mocha_and_math.cpp
+// odd_divisor.cpp
 
 void solve(){
-    int n;
+    ll n;
     cin >> n;
-    
-    vector<int> a(n);
-    int maxval = INT_MAX;
-    for(int i = 0; i < n; i++){
-        cin >> a[i];
-        maxval &= a[i];
-    }
-    
-    cout << maxval << endl;
-    return ;
 
+    while(n % 2 == 0){
+        n /= 2;
+    }
+    if(n == 1){
+        cout << "NO" << endl;
+    }
+    else{
+        cout << "YES" << endl;
+    }
 }
 
 int main(){
