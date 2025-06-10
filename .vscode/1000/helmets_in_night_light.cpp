@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 typedef pair<int, int> pii;
+typedef long long ll;
 
 bool compare(const pii& x, const pii& y){
     if(x.first == y.first) return x.second > y.second;
@@ -28,17 +29,23 @@ void solve(){
 
     sort(costAndPeople.begin(), costAndPeople.end(), compare);
 
-    int minimumCost = p, peopleCovered = 1;
+    int peopleCovered = 1;
+    ll minimumCost = p;
     for(int i = 0; i < n; i++){
         int cost = costAndPeople[i].first;
+        if(cost > p) break;
         int maxPeople = costAndPeople[i].second;
 
         // no of people to which this person will announce the news
         int people = min(maxPeople, n - peopleCovered);
-        minimumCost += cost * people;
+        minimumCost += 1ll * cost * people;
         peopleCovered += people;
 
         if(peopleCovered == n) break;
+    }
+
+    if(peopleCovered < n){
+        minimumCost += 1ll * p * (n - peopleCovered);
     }
 
     cout << minimumCost << endl;
