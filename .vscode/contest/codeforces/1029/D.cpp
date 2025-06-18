@@ -4,44 +4,35 @@ typedef pair<int, int> pii;
 
 void solve()
 {
+    /*
+        let x operations of 1st type and y operations of 2nd type
+
+        so a1 = 1.x + n.y
+        and a2 = 2.x + (n-1).y
+
+        x = y + a2 - a1
+        substitute this in eqn 1
+        y = (2a1 - a2)/(n+1)
+        similarly get x and verify these x and y for rest of the elements
+    */
+
     int n;
     cin >> n;
 
     vector<int> a(n);
-
-    for (int i = 0; i < n; i++)
-    {
+    for(int i = 0; i < n; i++){
         cin >> a[i];
     }
 
-    // make all the valid combinations for first element
-    // for first i+1 = 1, n-i = n
-
-    /*
-    vector<pii> validPairs;
-    for(int i = 0; n * i <= a[0]; i++){
-        int y = i;
-        int x = a[0] - n*i;
-        validPairs.push_back({x, y});
-    }
-
-    if(validPairs.empty()){
+    double y = (double)(2*a[0] - a[1])/(n+1), x = y + a[1] - a[0];
+    //cout << "y: " << y << endl;
+    if((2*a[0] - a[1]) % (n+1) != 0 || x < 0 || y < 0){
         cout << "NO" << endl;
         return ;
     }
-
+    
     for(int i = 1; i < n; i++){
-        bool isValid = false;
-
-        for(auto pair : validPairs){
-            int x = pair.first, y = pair.second;
-            if(x * (i+1) + y * (n-i) == a[i]){
-                isValid = true;
-                break;
-            }
-        }
-
-        if(!isValid){
+        if((i+1) * x + (n-i) * y != a[i]){
             cout << "NO" << endl;
             return ;
         }
@@ -49,53 +40,6 @@ void solve()
 
     cout << "YES" << endl;
     return ;
-
-    */
-
-    // base case
-    if (n == 1)
-    {
-        cout << "YES" << endl;
-        return;
-    }
-
-    if (n == 2)
-    {
-        vector<pii> validPairs;
-        for (int i = 0; n * i <= a[0]; i++)
-        {
-            int y = i;
-            int x = a[0] - n * i;
-            validPairs.push_back({x, y});
-        }
-
-        for (auto pair : validPairs)
-        {
-            int x = pair.first, y = pair.second;
-            if (x * (2 + 1) + y * (n - 1) == a[1])
-            {
-                cout << "YES" << endl;
-                return;
-            }
-        }
-
-        cout << "NO" << endl;
-        return;
-    }
-
-    int diff = (a[1] - a[0]);
-
-    for (int i = 2; i < n; i++)
-    {
-        if ((a[i] - a[i - 1]) != diff)
-        {
-            cout << "NO" << endl;
-            return;
-        }
-    }
-
-    cout << "YES" << endl;
-    return;
 }
 
 int main()
