@@ -1,168 +1,183 @@
-#include <bits/stdc++.h> 
-#include <cstdlib>
-#include <ctime>
-#include <set>
-#include <map>
-#include <stack>
-#include <functional>
-
+#include <bits/stdc++.h>
 using namespace std;
+typedef long long ll;
+typedef vector<vector<int>> vvi;
+typedef vector<int> vi;
+typedef vector<long long> vll; 
+typedef vector<vector<pair<int, ll>>> vvpill;
+typedef vector<vector<ll>> vvll;
+const int MAX = 18;
 
+/*
+in a tree there is alwaya a unique path between 2 nodes
+1e5 can be easily shown in 17 bits
+*/
 
-#define loop(i, a, b) for (int i = a; i < b; ++i)
-#define pb push_back
-#define mp make_pair
-#define F first
-#define S second
-#define vi vector<int>
-#define pii pair<int, int>
-#define int long long
-
-typedef long long LL;
-typedef unsigned long long ULL;
-typedef vector<vector<int>> Matrix;
-//typedef pair<int, int> pii;
-
-class Solution {
+class Solution
+{
 private:
-    int N, LG;
-    vector<vector<pii>> tunnel;
-    vector<vi> ancesTable;
-    vector<int> lvl, distFromZero, immParent;
+    int n;
+    vvpill adj; // for each node we will store it's ngbr and the wght b/w them
+    vvi up; // the row will be tke 2^k th parent and the cols will be the node - [k][node] = 2^k parent of node
+    vvll distup; // the row will be the 2^k the parent and the col will be node - [k][node] = distance b/w node and it's 2^k th parent
+    vi depth; // the depth of node measure from root node
 
-    void synthesizeGraph(Matrix& wires) {
-        tunnel.resize(N);
-        for (auto& conn : wires) {
-            int from = conn[0], to = conn[1], cost = conn[2];
-            tunnel[from].pb(mp(to, cost));
-            tunnel[to].pb(mp(from, cost));
+    void dfs(int node, int parent){
+        // storing 1st parent of node
+        up[0][node] = parent;
+
+        for(auto &[child, wght] : adj[node]){
+            // it's a bidirectional tree so ignore the node's parent as child
+            if(child == parent) continue;
+            // depth of child will be one more than it's parent
+            depth[child] = depth[node] + 1;
+            // distance b/w child and it's 1st parent (node) will be the edge weight
+            distup[0][child] = wght;
+            dfs(child, node);
         }
     }
 
-    void runBFS(int root) {
-        lvl.assign(N, -1);
-        distFromZero.assign(N, 0);
-        immParent.assign(N, -1);
-        queue<int> pendulum;
-        pendulum.push(root);
-        lvl[root] = 0;
-
-        while (!pendulum.empty()) {
-            int curr = pendulum.front(); pendulum.pop();
-            for (auto& edge : tunnel[curr]) {
-                int adj = edge.F, weight = edge.S;
-                if (lvl[adj] == -1) {
-                    lvl[adj] = lvl[curr] + 1;
-                    distFromZero[adj] = distFromZero[curr] + weight;
-                    immParent[adj] = curr;
-                    pendulum.push(adj);
-                }
+    void build(){
+        // 2^1 = 2nd, 2^2 = 4th , ... 2^k
+        for(int k = 1; k < MAX; k++){
+            // 4th parent of a node will be the 2nd parent of it's 2nd parent
+            // also the distance to 4th parent will be sum of distance to 2nd parent and distance of 2nd parent to it's 2nd parent
+            for(int node = 0; node < n; node++){
+                up[k][node] = up[k-1][up[k-1][node]];
+                distup[k][node] = distup[k-1][node] + distup[k-1][up[k-1][node]];
             }
         }
     }
 
-    void computeBinaryLifting() {
-        LG = 0;
-        while ((1 << LG) <= N) ++LG;
-        ancesTable.assign(LG, vi(N, -1));
+    int lca(int u, int v){
+        // first we need to make the level of u and v equal
 
-        loop(i, 0, N) ancesTable[0][i] = immParent[i];
+        // assuming that level of u will always be <= level of v
+        if(depth[u] > depth[v]) swap(u, v);
 
-        loop(j, 1, LG) {
-            loop(i, 0, N) {
-                int prev = ancesTable[j - 1][i];
-                ancesTable[j][i] = (prev == -1 ? -1 : ancesTable[j - 1][prev]);
+        // now make the level of v and u equal
+        int diff = depth[v] - depth[u];
+
+        if(diff){
+            for(int k = 0; k < MAX; k++){
+                if(diff & (1 << k)) v = up[k][v];
             }
         }
+
+        // check if both becomes equal
+        if(u == v) return u;
+
+        // now we will make the u and v jump up till when they both have unequal parent - which is just below the lca
+        // bcoz at and after lca they both will have surely have same parent
+        // so first we will try to make large jumps and it will be invalid the reduce the jump by half
+        // like 8th parent , 4th parent (not valid) ok so 2nd parent then 1st parent
+        for(int k = MAX-1; k >= 0; k--){
+            int uParent = up[k][u], vParent = up[k][v];
+
+            if(uParent != vParent){
+                u = uParent;
+                v = vParent;
+            }
+        }
+
+        // now the u and v are just 1 level below their lca
+        return up[0][u];
     }
 
-    function<int(int, int)> ancestorFinder = [&](int node, int jump) {
-        loop(i, 0, LG) {
-            if ((jump >> i) & 1) {
-                if (node == -1) break;
-                node = ancesTable[i][node];
+    ll calculateDistance(int node, int parent){
+        ll totalDistance = 0;
+
+        int diff = depth[node] - depth[parent];
+        
+        // if the level diff is 5(101) then it can be cover as 1st parent then 4th parent of 1st parent
+        // and distance also likewise
+        for(int k = 0; k < MAX; k++){
+            if(diff & (1 << k)){
+                totalDistance += distup[k][node];
+                node = up[k][node];
             }
         }
-        return node;
-    };
 
-    function<int(int, int)> lowestCommonAncestor = [&](int a, int b) {
-        if (lvl[a] < lvl[b]) swap(a, b);
-        int diff = lvl[a] - lvl[b];
-        a = ancestorFinder(a, diff);
-        if (a == b) return a;
-        for (int i = LG - 1; i >= 0; --i) {
-            if (ancesTable[i][a] != ancesTable[i][b]) {
-                a = ancesTable[i][a];
-                b = ancesTable[i][b];
-            }
-        }
-        return ancesTable[0][a];
-    };
-
+        return totalDistance;
+    }
 public:
-    vector<int> findMedian(int nodes, vector<vector<int>>& edges, vector<vector<int>>& queries) {
-        N = nodes;
-        synthesizeGraph(edges);
-        runBFS(0);
-        computeBinaryLifting();
-
-        vector<int> results;
-        for (auto& interrogate : queries) {
-            int source = interrogate[0], destination = interrogate[1];
-            int ancestor = lowestCommonAncestor(source, destination);
-
-            LL fullPath = distFromZero[source] + distFromZero[destination] - 2 * distFromZero[ancestor];
-            LL pathToU = distFromZero[source] - distFromZero[ancestor];
-
-            if (2 * pathToU >= fullPath) {
-                int lo = lvl[ancestor], hi = lvl[source], res = source;
-                while (lo <= hi) {
-                    int mid = (lo + hi) >> 1;
-                    int midNode = ancestorFinder(source, lvl[source] - mid);
-                    if (midNode == -1) {
-                        hi = mid - 1;
-                        continue;
-                    }
-                    if (2 * (distFromZero[source] - distFromZero[midNode]) >= fullPath) {
-                        res = midNode;
-                        hi = mid - 1;
-                    } else {
-                        lo = mid + 1;
-                    }
-                }
-                results.pb(res);
-            } else {
-                LL remain = fullPath - 2 * pathToU;
-                int lo = lvl[ancestor], hi = lvl[destination], res = destination;
-                while (lo <= hi) {
-                    int mid = (lo + hi) >> 1;
-                    int midNode = ancestorFinder(destination, lvl[destination] - mid);
-                    if (midNode == -1) {
-                        hi = mid - 1;
-                        continue;
-                    }
-                    if (2 * (distFromZero[midNode] - distFromZero[ancestor]) >= remain) {
-                        res = midNode;
-                        hi = mid - 1;
-                    } else {
-                        lo = mid + 1;
-                    }
-                }
-                results.pb(res);
-            }
+    vector<int> findMedian(int n, vector<vector<int>> &edges, vector<vector<int>> &queries)
+    {
+        this->n = n;
+        adj.resize(n);
+        for(auto e : edges){
+            int u = e[0], v = e[1], w = e[2];
+            adj[u].push_back({v, w});
+            adj[v].push_back({u, w});
         }
 
-        return results;
+        up.resize(MAX, vi(n));
+        distup.resize(MAX, vll(n));
+        depth.resize(n, 0);
+
+        // starting with root node as 0 and parent as 0 as root node is himself parent
+        dfs(0, 0);
+
+        // now perform the binary lifting and build the table
+        build();
+
+        
+        vi ans;
+        for(auto q : queries){
+            int u = q[0], v = q[1];
+            // the path b/w u and v will surely travel through their lca
+            int l = lca(u, v);
+            // get the distance from lca to u and lca to v;
+            ll du = calculateDistance(u, l), dv = calculateDistance(v, l);
+            ll half = (du + dv + 1) / 2;
+
+            if(u == v){
+                ans.push_back(u);
+                continue;
+            }
+
+            // either this >= half distance will be between u and lca or in b/w v and lca
+            int node = u;
+            ll rem = half;
+            // means the ans node is b/w lca and v
+            if(du < half) node = v;
+
+            // now we will jump up the node till the distance b/w that parent node and node will be less than half
+            // and then the ans node will be the the 1st parent of that node bcoz their the distance will either become equal or > than half
+            for(int k = MAX-1; k >= 0; k--){
+                if(distup[k][node] < rem){
+                    rem -= distup[k][node];
+                    node = up[k][node];
+                }
+            }
+
+            if(du < half && calculateDistance(up[0][node], l) + du < half){
+                ans.push_back(node);
+                continue;
+            }
+
+            ans.push_back(up[0][node]);
+        }
+        return ans;
     }
+
 };
 
-
-int main(){
+int main()
+{
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    
-
     return 0;
 }
+
+/*
+const auto _ = std::cin.tie(nullptr)->sync_with_stdio(false);
+const auto __ = []() {
+    struct ___ {
+        static void _() { std::ofstream("display_runtime.txt") << 0 << '\n'; }
+    };
+    std::atexit(&___::_);
+    return 0;
+}();
+*/
