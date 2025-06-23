@@ -4,57 +4,57 @@ using namespace std;
 class Solution {
 public:
     int primeSubarray(vector<int>& nums, int k) {
-        // precomputing all the primes
-        vector<int> isPrime(5*1e4 + 1, true);
+        int n = nums.size();
+
+        // 1. calculate in advance whether a number is prime or not
+        int maxi = *max_element(nums.begin(), nums.end());
+        vector<bool> isPrime(maxi+1, true);
 
         // 0 and 1 are not prime
         isPrime[0] = isPrime[1] = false;
-        for(int i = 2; i * i < 5 * 1e4 + 1; i++){
-            if(isPrime[i]){
-                for(int j = i*i; j < 5 * 1e4 + 1; j += i){
-                    isPrime[j] = false;
-                }
+        for(int i = 2; i <= maxi; i++){
+            // mark all the multiples of prime as non prime
+            if(maxi - i <= i) continue;
+            for(int j = i * i; j <= maxi; j += i){
+                isPrime[j] = false;
             }
         }
 
-        int s = 0, count = 0, countPrime = 0, n = nums.size();
-        deque<int> minD, maxD;
+        // multiset will store the primes in sorted manner (also stores duplicates)
+        multiset<int> s; // to store the prime element
+        // deque gives access to push and pop from both front and back
+        deque<int> dq; // to store the indices
 
-        for(int e = 0; e < n; e++){
-            if(isPrime[nums[e]]){
-                while(!minD.empty() && nums[e] < minD.back()) minD.pop_back();
-
-                minD.push_back(nums[e]);
-
-                while(!maxD.empty() && nums[e] > maxD.back()) maxD.pop_back();
-
-                maxD.push_back(nums[e]);
-
-                countPrime++;
+        int l = 0, r = 0, count = 0;
+        for(int r = 0; r < n; r++){
+            // 2. if nums[r] is prime store it in multiset and it's index in deque
+            if(isPrime[nums[r]]){
+                s.insert(nums[r]);
+                dq.push_back(r);
             }
 
-            // shrinking from left
-            while(!minD.empty() && !maxD.empty() && maxD.front() - minD.front() > k){
-                if(isPrime[s]){
-                    if(nums[s] == minD.front()) minD.pop_front();
-                    if(nums[s] == maxD.front()) maxD.pop_front();
-                    countPrime--;
+            // 3. shrink the window from left if it's violates the condition that max prime - min prime <= k
+            while(!s.empty() && *s.rbegin() - *s.begin() > k){
+                if(isPrime[nums[l]]){
+                    s.erase(s.find(nums[l])); // this will only delete one occurence of nums[l]
+                    dq.pop_front();
                 }
-                s++;
+                l++;
             }
 
-            if (countPrime >= 2) {
-                
-                int left = s;
-                int right = e;
-                int validStart = left;
+            // 4. count the subarrays if the current window has more than equal to 2 primes -> coz they now definitely satisfy the diff condition
+            if(dq.size() >= 2){
+                // 5. from the position of l till the 2nd last prime from right, all will form a valid subarray with the last prime from left, satisfying the diff condition
+                int last = dq.back();
+                dq.pop_back();
+                int secondLast = dq.back();
+                dq.pop_back();
 
-                
-                int tmpPrimeCount = 0;
-                for (int i = e; i >= s; --i) {
-                    if (isPrime[nums[i]]) ++tmpPrimeCount;
-                    if (tmpPrimeCount >= 2) ++count;
-                }
+                count += secondLast - l + 1;
+
+                // 6. now again the place the back the last second last in dq for next iterations
+                dq.push_back(secondLast);
+                dq.push_back(last);
             }
         }
 

@@ -3,19 +3,41 @@ using namespace std;
 
 class Solution
 {
+private:
+    vector<int> evenIdx, oddIdx;
+    int n;
+    int calculateMinSwaps(bool isEven){
+        vector<int> arr = evenIdx;
+        if(!isEven) arr = oddIdx;
+
+        int swaps = 0, j = 0;
+        for(int i = 0; i < n;){
+            swaps += abs(i - arr[j++]);
+            i += 2;
+        }
+
+        return swaps;
+    }
 public:
     int minSwaps(vector<int> &nums)
     {
-        int evens = 0, odds = 0, n = nums.size();
-        for(int i : nums){
-            if(i % 2) odds++;
-            else evens++;
+        n = nums.size();
+        for(int i = 0; i < n; i++){
+            if(nums[i] % 2) oddIdx.push_back(i);
+            else evenIdx.push_back(i);
         }
 
-        if(n % 2 && abs(evens - odds) > 1) return -1;
-        if(n % 2 == 0 && evens - odds != 0) return -1;
+        //cout << oddIdx.size() << " " << evenIdx.size() << endl;
+        int countDiff = abs(evenIdx.size() - oddIdx.size());
+        if(n % 2 && countDiff > 1) return -1;
+        if(n % 2 == 0 && countDiff != 0) return -1;
 
-        
+
+        if(n % 2){
+            return evenIdx.size() > oddIdx.size() ? calculateMinSwaps(true) : calculateMinSwaps(false);
+        }
+
+        return min(calculateMinSwaps(true), calculateMinSwaps(false));
     }
 };
 
@@ -25,7 +47,9 @@ public:
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    // Solution sol;
+    Solution sol;
+    vector<int> nums = {4,5,6,8};
+    cout << sol.minSwaps(nums);
     return 0;
 }
 
