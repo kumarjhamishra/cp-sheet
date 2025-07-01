@@ -11,18 +11,10 @@ const auto __ = []() {
 #include <bits/stdc++.h>
 using namespace std;
 
-class Solution {
-public:
-    int minIncrease(int n, vector<vector<int>>& edges, vector<int>& cost) {
-        
-    }
-};
-
 int main(){
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    
 
     return 0;
 }
