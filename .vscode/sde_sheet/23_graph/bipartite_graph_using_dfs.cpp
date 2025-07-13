@@ -7,7 +7,6 @@ const auto __ = []() {
     std::atexit(&___::_);
     return 0;
 }();
-
 */
 #include <bits/stdc++.h>
 using namespace std;
